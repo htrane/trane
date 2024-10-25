@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Tuần 6: CarAndWindMill với OpenGL</title>
+
+    <script src="glsim.js"></script> <!-- load the OpenGL 1.1 simulation code -->
+    <script>
+        let frameNumber = 0;
+
+        function transform() {
+            glClear(GL_COLOR_BUFFER_BIT); // Fills the scene with blue.
+            frameNumber += 1;
+            drawBG();
+            drawMT();
+            drawRoad();
+
+            drawWind(50,100,0.9,0.9);
+            drawWind(-200,80,1.1,1.1);
+            drawWind(-100,150,0.7,0.7);
+            drawSun(200,150);
+            drawCar();
+            setInterval(transform,1000/100);
+
+        }
+        function drawBG(){
+            glBegin(GL_POLYGON);
+            glPointSize(10.0);
+            glColor3ub(200,200,255);
+            glVertex2f(-300,250);
+            glVertex2f(300,250);
+            glVertex2f(300,-250);
+            glVertex2f(-300,-250);
+            glEnd();
+        }
+        function drawMT(){
+            // glBegin(GL_POINTS);
+            glBegin(GL_POLYGON);
+            glPointSize(5.0);
+
+            glColor3ub(0,150,30);
+
+            glVertex2f(-300,-50);
+
+            glVertex2f(-200,30);
+            glVertex2f(-150,0);
+
+            glVertex2f(-50,50);
+            glVertex2f(100,-50);
+            glVertex2f(200,0);
+
+            glVertex2f(300,-50);
+            glVertex2f(300,-250);
+
+            glVertex2f(-300,-250);
+            glEnd();
+        }
+        function drawRoad(){
+            //Đường tím
+            // glBegin(GL_POINTS);
+            glBegin(GL_POLYGON);
+            glColor3ub(100,100,150);
+            glVertex2f(-300,-100);
+            glVertex2f(300,-100);
+            glVertex2f(300,-200);
+            glVertex2f(-300,-200);
+            glEnd();
+            //Vạch trắng
+            glBegin(GL_POLYGON)
+            glColor3ub(255,255,255);
+            glVertex2f(-300,-140);
+            glVertex2f(-300,-160);
+            glVertex2f(300,-160);
+            glVertex2f(300,-140);
+            glEnd();
+        }
+        function drawCircle(x,y,r,fill){
+            let n=64;
+            glColor3ubv(fill);
+            glBegin(GL_POLYGON)
+            for(i=0;i<n;i++){
+                angle=2*Math.PI*i/n;
+                x1=x+r*Math.cos(angle);
+                y1=y+r*Math.sin(angle);
+                glVertex2f(x1,y1);
+            }
+            glEnd();
+        }
+        function drawLine(x1,y1,x2,y2,color){
+            glColor3ubv(color);
+            glBegin(GL_LINES);
+            glVertex2f(x1,y1);
+            glVertex2f(x2,y2);
+            glEnd();
+        }
+        function drawSun(x,y){
+            drawCircle(x,y,40,[255,255,0]);
+            let n=12;
+            glPushMatrix();
+            glTranslatef(x, y, 0);
+            glRotatef(frameNumber,0,0,1);
+            for(i=0;i<n;i++){
+                drawLine(0,0+40,0,0+40+30,[255,0,0]);
+                glRotatef(360/n,0,0,1);
+                }
+            glPopMatrix();
+        }
+        function drawVane(x,y){
+            glColor3ub(200,100,100);
+            glBegin(GL_POLYGON);
+            glVertex2f(x,y);
+            glVertex2f(x+30,y+7);
+            glVertex2f(x+100,y);
+            glVertex2f(x+30,y-7);
+            glEnd();
+        }
+        function drawPost(x,y){
+            glColor3ub(170,153,153);
+            glBegin(GL_POLYGON)
+            glVertex2f(x-2,y-150);
+            glVertex2f(x+2,y-150);
+            glVertex2f(x+2,y);
+            glVertex2f(x-2,y);
+            glEnd();
+        }
+        function drawWind(x,y,sx,sy){
+            glPushMatrix();
+            glScalef(sx,sy,1);
+            glTranslatef(x, y, 1);
+            drawPost(0,0);
+            let n=3;
+            glRotatef(frameNumber,0,0,1);
+            for(i=0;i<n;i++){
+                drawVane(0,0);
+                glRotatef(360/n,0,0,1);
+            }
+
+            glPopMatrix();
+
+        }
+        function drawPolygonCar(){
+            glColor3ub(255,0,0);
+            glBegin(GL_POLYGON);
+            glVertex2f(-300,-90);
+            glVertex2f(-200,-90);
+            glVertex2f(-200,-120);
+            glVertex2f(-300,-120);
+            glEnd();
+
+            glColor3ub(255,0,0);
+            glBegin(GL_POLYGON);
+            glVertex2f(-240,-90);
+            glVertex2f(-240,-70);
+            glVertex2f(-280,-70);
+            glVertex2f(-280,-90);
+            glEnd();
+
+        }
+        function drawCircleCar(x,y,r,fill){
+            let n=64;
+            glColor3ubv(fill);
+            glBegin(GL_POLYGON);
+            for(i=0;i<n;i++){
+                angle=2*Math.PI*i/n;
+                x1=x+r*Math.cos(angle);
+                y1=y+r*Math.sin(angle);
+                glVertex2f(x1,y1);
+            }
+            glEnd();
+        }
+        function drawWheel(x,y){
+            glPushMatrix();
+            glTranslatef(x, y, 0);
+            drawCircleCar(0,0,15,[0,0,0]); 
+            drawCircleCar(0,0,12,[255,255,255]);
+            let n=12;
+            glRotatef(frameNumber,0,0,1);
+            for(i=0;i<n;i++){
+                drawLine(0,0+12,0,0+12-15,[255,0,0]);
+                glRotatef(360/n,0,0,1);
+            }
+            glPopMatrix();
+        }
+        function drawCar(){
+            glPushMatrix();
+            glTranslatef(frameNumber%1000,0,0,1);
+            drawWheel(-220,-125);
+            drawWheel(-280,-125);
+            drawPolygonCar();
+            glPopMatrix();
+        }
+
+        function draw() {
+            // setInterval(transform, 1000 / 24)
+            
+        }
+
+        function initGL() {
+            glClearColor(0.9, 0.9, 0.9, 1);
+            // The next three lines set up the coordinates system.
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity();
+            glOrtho(-300, 300, -250, 250, -1, 1);
+            glMatrixMode(GL_MODELVIEW);
+
+            glEnable(GL_POINT_SMOOTH);
+        }
+
+        function init() {  // Called by <body onload="init()">, when the page has loaded.
+            try {
+                glsimUse("glcanvas"); // OpenGL will draw to the canvas with id="glcanvas".
+            }
+            catch (e) {
+                document.getElementById("canvas-holder").innerHTML =
+                    "Sorry, an error occured:<br>" + e;
+                return;
+            }
+            initGL();
+            transform();
+        }
+
+        window.onload = init;
+
+    </script>
+
+</head>
+
+<body>
+
+    <h3>Tuần 6: CarAndWindMill với OpenGL</h3>
+
+    <noscript>
+        <p><b>Sorry, this page requires JavaScript!</b></p>
+    </noscript>
+
+    <div id="canvas-holder">
+        <canvas id="glcanvas" width="600" height="500" style="border: solid 10px gray;"></canvas>
+    </div>
+
+</body>
+
+</html>
